@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Country Aid Clustering - Input</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Enter Country Data</h2>
+        <form id="countryForm" class="mt-4">
+            <div class="mb-3">
+                <label for="country" class="form-label">Country Name</label>
+                <input type="text" class="form-control" id="country" name="country" required>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="child_mort" class="form-label">Child Mortality</label>
+                    <input type="number" step="0.01" class="form-control" id="child_mort" name="child_mort" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="exports" class="form-label">Exports</label>
+                    <input type="number" step="0.01" class="form-control" id="exports" name="exports" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="health" class="form-label">Health</label>
+                    <input type="number" step="0.01" class="form-control" id="health" name="health" required>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="imports" class="form-label">Imports</label>
+                    <input type="number" step="0.01" class="form-control" id="imports" name="imports" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="income" class="form-label">Income</label>
+                    <input type="number" step="0.01" class="form-control" id="income" name="income" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="inflation" class="form-label">Inflation</label>
+                    <input type="number" step="0.01" class="form-control" id="inflation" name="inflation" required>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="life_expec" class="form-label">Life Expectancy</label>
+                    <input type="number" step="0.01" class="form-control" id="life_expec" name="life_expec" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="total_fer" class="form-label">Total Fertility</label>
+                    <input type="number" step="0.01" class="form-control" id="total_fer" name="total_fer" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="gdpp" class="form-label">GDP per capita</label>
+                    <input type="number" step="0.01" class="form-control" id="gdpp" name="gdpp" required>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Predict Cluster</button>
+        </form>
+        <div id="result" class="mt-4"></div>
+    </div>
+
+    <script>
+        document.getElementById('countryForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                const resultDiv = document.getElementById('result');
+                if (result.error) {
+                    resultDiv.innerHTML = `<div class="alert alert-danger">${result.error}</div>`;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            Country: ${result.country}<br>
+                            Cluster: ${result.cluster}
+                        </div>`;
+                }
+            } catch (error) {
+                document.getElementById('result').innerHTML = `
+                    <div class="alert alert-danger">
+                        Error: ${error.message}
+                    </div>`;
+            }
+        });
+    </script>
+</body>
+</html>
