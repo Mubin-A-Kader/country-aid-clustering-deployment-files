@@ -1,94 +1,547 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Country Aid Clustering - Input</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Country Aid Clustering</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/@tailwindcss/browser@latest"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <style>
+        /* Custom styles for image display */
+        .country-image {
+            width: 100px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out;
+            border: 2px dotted #3b82f6; /* Added dotted border */
+            padding: 4px; /* Added padding to separate border from image */
+        }
+        .country-image:hover {
+            transform: scale(1.05);
+        }
+        .form-control {
+            border-radius: 4px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06);
+            transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #3b82f6; /* Tailwind's blue-500 */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary {
+            border-radius: 4px;
+            transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out, box-shadow 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .btn-primary:hover {
+            background-color: #2563eb; /* Tailwind's blue-700 */
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        .alert {
+            border-radius: 4px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid transparent;
+        }
+        .alert-success {
+            background-color: #e6f4f5;
+            border-color: #b6e0e5;
+            color: #0c4a60;
+        }
+        .alert-danger {
+            background-color: #fee2e2;
+            border-color: #fecaca;
+            color: #991b1b;
+        }
+        .select2-container--default .select2-selection--single {
+            border-radius: 4px;
+            border: 1px solid #d1d5db;
+            padding: 0.5rem;
+            height: auto;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06);
+            background-color: white;
+        }
+        .select2-container--default .select2-selection--single:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #374151;
+            line-height: 1.5rem;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .select2-dropdown {
+            border-radius: 4px;
+            border: 1px solid #d1d5db;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .select2-search__field {
+            border-radius: 4px;
+            border: 1px solid #d1d5db;
+            padding: 0.5rem;
+            width: 100%;
+            outline: none;
+            font-size: 1rem;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06);
+        }
+        .select2-results__option {
+            padding: 0.5rem;
+            color: #374151;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .select2-results__option:hover, .select2-results__option--highlighted {
+            background-color: #f0f0f0;
+            color: #1f2937;
+        }
+    </style>
+    <script>
+        $(document).ready(function() {
+            $('#country').select2({
+                placeholder: "Select a country",
+                data: [
+                    {id: 'USA', text: 'USA'},
+                    {id: 'Canada', text: 'Canada'},
+                    {id: 'UK', text: 'UK'},
+                    {id: 'India', text: 'India'},
+                    {id: 'China', text: 'China'},
+                    {id: 'Japan', text: 'Japan'},
+                    {id: 'Brazil', text: 'Brazil'},
+                    {id: 'Australia', text: 'Australia'},
+                    {id: 'Germany', text: 'Germany'},
+                    {id: 'France', text: 'France'},
+                    {id: 'Nigeria', text: 'Nigeria'},
+                    {id: 'Egypt', text: 'Egypt'},
+                    {id: 'South Africa', text: 'South Africa'},
+                    {id: 'Mexico', text: 'Mexico'},
+                    {id: 'Russia', text: 'Russia'},
+                    {id: 'Italy', text: 'Italy'},
+                    {id: 'Spain', text: 'Spain'},
+                    {id: 'Argentina', text: 'Argentina'},
+                    {id: 'Indonesia', text: 'Indonesia'},
+                    {id: 'Bangladesh', text: 'Bangladesh'},
+                    {id: 'Pakistan', text: 'Pakistan'},
+                    {id: 'Vietnam', text: 'Vietnam'},
+                    {id: 'Thailand', text: 'Thailand'},
+                    {id: 'Malaysia', text: 'Malaysia'},
+                    {id: 'Singapore', text: 'Singapore'},
+                    {id: 'Philippines', text: 'Philippines'},
+                    {id: 'Netherlands', text: 'Netherlands'},
+                    {id: 'Sweden', text: 'Sweden'},
+                    {id: 'Switzerland', text: 'Switzerland'},
+                    {id: 'Norway', text: 'Norway'},
+                    {id: 'Denmark', text: 'Denmark'},
+                    {id: 'Finland', text: 'Finland'},
+                    {id: 'Poland', text: 'Poland'},
+                    {id: 'Ukraine', text: 'Ukraine'},
+                    {id: 'Greece', text: 'Greece'},
+                    {id: 'Turkey', text: 'Turkey'},
+                    {id: 'Iran', text: 'Iran'},
+                    {id: 'Saudi Arabia', text: 'Saudi Arabia'},
+                    {id: 'South Korea', text: 'South Korea'},
+                    {id: 'North Korea', text: 'North Korea'},
+                    {id: 'Israel', text: 'Israel'},
+                    {id: 'Ireland', text: 'Ireland'},
+                    {id: 'Portugal', text: 'Portugal'},
+                    {id: 'Austria', text: 'Austria'},
+                    {id: 'Belgium', text: 'Belgium'},
+                    {id: 'Hungary', text: 'Hungary'},
+                    {id: 'Czech Republic', text: 'Czech Republic'},
+                    {id: 'Romania', text: 'Romania'},
+                    {id: 'Bulgaria', text: 'Bulgaria'},
+                    {id: 'Croatia', text: 'Croatia'},
+                    {id: 'Serbia', text: 'Serbia'},
+                    {id: 'Slovakia', text: 'Slovakia'},
+                    {id: 'Slovenia', text: 'Slovenia'},
+                    {id: 'Estonia', text: 'Estonia'},
+                    {id: 'Latvia', text: 'Latvia'},
+                    {id: 'Lithuania', text: 'Lithuania'},
+                    {id: 'New Zealand', text: 'New Zealand'},
+                    {id: 'Chile', text: 'Chile'},
+                    {id: 'Colombia', text: 'Colombia'},
+                    {id: 'Peru', text: 'Peru'},
+                    {id: 'Venezuela', text: 'Venezuela'},
+                    {id: 'Cuba', text: 'Cuba'},
+                    {id: 'Kenya', text: 'Kenya'},
+                    {id: 'Morocco', text: 'Morocco'},
+                    {id: 'Ghana', text: 'Ghana'},
+                    {id: 'Angola', text: 'Angola'},
+                    {id: 'Algeria', text: 'Algeria'},
+                    {id: 'Tanzania', text: 'Tanzania'},
+                    {id: 'Uganda', text: 'Uganda'},
+                    {id: 'Ethiopia', text: 'Ethiopia'},
+                    {id: 'Sudan', text: 'Sudan'},
+                    {id: 'Afghanistan', text: 'Afghanistan'},
+                    {id: 'Myanmar', text: 'Myanmar'},
+                    {id: 'Sri Lanka', text: 'Sri Lanka'},
+                    {id: 'Nepal', text: 'Nepal'},
+                    {id: 'Cambodia', text: 'Cambodia'},
+                    {id: 'Laos', text: 'Laos'},
+                    {id: 'Mongolia', text: 'Mongolia'},
+                    {id: 'Kazakhstan', text: 'Kazakhstan'},
+                    {id: 'Uzbekistan', text: 'Uzbekistan'},
+                    {id: 'Kyrgyzstan', text: 'Kyrgyzstan'},
+                    {id: 'Tajikistan', text: 'Tajikistan'},
+                    {id: 'Turkmenistan', text: 'Turkmenistan'},
+                    {id: 'Azerbaijan', text: 'Azerbaijan'},
+                    {id: 'Georgia', text: 'Georgia'},
+                    {id: 'Armenia', text: 'Armenia'},
+                    {id: 'Cyprus', text: 'Cyprus'},
+                    {id: 'Lebanon', text: 'Lebanon'},
+                    {id: 'Jordan', text: 'Jordan'},
+                    {id: 'Oman', text: 'Oman'},
+                    {id: 'Kuwait', text: 'Kuwait'},
+                    {id: 'Qatar', text: 'Qatar'},
+                    {id: 'Bahrain', text: 'Bahrain'},
+                    {id: 'UAE', text: 'UAE'},
+                    {id: 'Yemen', text: 'Yemen'},
+                    {id: 'Syria', text: 'Syria'},
+                    {id: 'Palestine', text: 'Palestine'},
+                    {id: 'Iraq', text: 'Iraq'},
+                    {id: 'Libya', text: 'Libya'},
+                    {id: 'Tunisia', text: 'Tunisia'},
+                    {id: 'Somalia', text: 'Somalia'},
+                    {id: 'Cameroon', text: 'Cameroon'},
+                    {id: 'Ivory Coast', text: 'Ivory Coast'},
+                    {id: 'Senegal', text: 'Senegal'},
+                    {id: 'Zimbabwe', text: 'Zimbabwe'},
+                    {id: 'Zambia', text: 'Zambia'},
+                    {id: 'Madagascar', text: 'Madagascar'},
+                    {id: 'Mozambique', text: 'Mozambique'},
+                    {id: 'Namibia', text: 'Namibia'},
+                    {id: 'Botswana', text: 'Botswana'},
+                    {id: 'Uruguay', text: 'Uruguay'},
+                    {id: 'Ecuador', text: 'Ecuador'},
+                    {id: 'Bolivia', text: 'Bolivia'},
+                    {id: 'Paraguay', text: 'Paraguay'},
+                    {id: 'Haiti', text: 'Haiti'},
+                    {id: 'Dominican Republic', text: 'Dominican Republic'},
+                    {id: 'Guatemala', text: 'Guatemala'},
+                    {id: 'Honduras', text: 'Honduras'},
+                    {id: 'El Salvador', text: 'El Salvador'},
+                    {id: 'Nicaragua', text: 'Nicaragua'},
+                    {id: 'Costa Rica', text: 'Costa Rica'},
+                    {id: 'Panama', text: 'Panama'},
+                    {id: 'Jamaica', text: 'Jamaica'},
+                    {id: 'Trinidad and Tobago', text: 'Trinidad and Tobago'},
+                    {id: 'Guyana', text: 'Guyana'},
+                    {id: 'Suriname', text: 'Suriname'},
+                    {id: 'Belize', text: 'Belize'},
+                    {id: 'Barbados', text: 'Barbados'},
+                    {id: 'Fiji', text: 'Fiji'},
+                    {id: 'Papua New Guinea', text: 'Papua New Guinea'},
+                    {id: 'Solomon Islands', text: 'Solomon Islands'},
+                    {id: 'Vanuatu', text: 'Vanuatu'},
+                    {id: 'Micronesia', text: 'Micronesia'},
+                    {id: 'Kiribati', text: 'Kiribati'},
+                    {id: 'Marshall Islands', text: 'Marshall Islands'},
+                    {id: 'Nauru', text: 'Nauru'},
+                    {id: 'Palau', text: 'Palau'},
+                    {id: 'Samoa', text: 'Samoa'},
+                    {id: 'Tonga', text: 'Tonga'},
+                    {id: 'Tuvalu', text: 'Tuvalu'},
+                ]
+            });
+
+            $('#country').on('select2:select', function () {
+                $(this).closest('.mb-4').next().find('input').focus();
+            });
+
+            $('form input').on('keypress', function (e) {
+                if (e.which === 13) {
+                    e.preventDefault();
+                    const nextInput = $(this).closest('.mb-2, .mb-4').next().find('input, select');
+                    if (nextInput.length) {
+                        nextInput.focus();
+                    } else {
+                        $('form').submit();
+                    }
+                }
+            });
+        });
+    </script>
+    <script>
+        $(document).ready(function() {
+            $('#country').on('change', function() {
+                const selectedCountry = $(this).val();
+                const flagUrl = countryImages[selectedCountry];
+                if (flagUrl) {
+                    $('#country-image-preview').attr('src', flagUrl).removeClass('hidden');
+                } else {
+                    $('#country-image-preview').addClass('hidden');
+                }
+            });
+        });
+    </script>
 </head>
-<body>
-    <div class="container mt-5">
-        <h2>Enter Country Data</h2>
-        <form id="countryForm" class="mt-4">
-            <div class="mb-3">
-                <label for="country" class="form-label">Country Name</label>
-                <input type="text" class="form-control" id="country" name="country" required>
-            </div>
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <label for="child_mort" class="form-label">Child Mortality</label>
-                    <input type="number" step="0.01" class="form-control" id="child_mort" name="child_mort" required>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <label for="exports" class="form-label">Exports</label>
-                    <input type="number" step="0.01" class="form-control" id="exports" name="exports" required>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <label for="health" class="form-label">Health</label>
-                    <input type="number" step="0.01" class="form-control" id="health" name="health" required>
+<body class="bg-gray-100 font-roboto min-h-screen flex items-center justify-center">
+    <div class="container bg-white rounded-lg shadow-md p-8 w-4/5 max-w-2xl transition-transform hover:scale-101 mx-auto">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center text-blue-600">
+            Enter Country Data
+        </h2>
+        <form id="countryForm" class="space-y-6">
+            <div class="mb-4">
+                <label for="country" class="block text-gray-700 text-sm font-medium mb-2">Country Name</label>
+                <div class="flex items-center">
+                    <img id="country-image-preview" src="#" alt="Country Flag" class="country-image hidden mr-3">
+                    <select class="form-control appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="country" name="country" required>
+                    </select>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <label for="imports" class="form-label">Imports</label>
-                    <input type="number" step="0.01" class="form-control" id="imports" name="imports" required>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="mb-2 md:mb-0">
+                    <label for="child_mort" class="block text-gray-700 text-sm font-medium mb-2">Child Mortality</label>
+                    <input type="number" step="0.01" class="form-control appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="child_mort" name="child_mort" required>
                 </div>
-                <div class="col-md-4 mb-3">
-                    <label for="income" class="form-label">Income</label>
-                    <input type="number" step="0.01" class="form-control" id="income" name="income" required>
+                <div class="mb-2 md:mb-0">
+                    <label for="exports" class="block text-gray-700 text-sm font-medium mb-2">Exports</label>
+                    <input type="number" step="0.01" class="form-control appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="exports" name="exports" required>
                 </div>
-                <div class="col-md-4 mb-3">
-                    <label for="inflation" class="form-label">Inflation</label>
-                    <input type="number" step="0.01" class="form-control" id="inflation" name="inflation" required>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <label for="life_expec" class="form-label">Life Expectancy</label>
-                    <input type="number" step="0.01" class="form-control" id="life_expec" name="life_expec" required>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <label for="total_fer" class="form-label">Total Fertility</label>
-                    <input type="number" step="0.01" class="form-control" id="total_fer" name="total_fer" required>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <label for="gdpp" class="form-label">GDP per capita</label>
-                    <input type="number" step="0.01" class="form-control" id="gdpp" name="gdpp" required>
+                <div class="mb-2 md:mb-0">
+                    <label for="health" class="block text-gray-700 text-sm font-medium mb-2">Health</label>
+                    <input type="number" step="0.01" class="form-control appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="health" name="health" required>
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary">Predict Cluster</button>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="mb-2 md:mb-0">
+                    <label for="imports" class="block text-gray-700 text-sm font-medium mb-2">Imports</label>
+                    <input type="number" step="0.01" class="form-control appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="imports" name="imports" required>
+                </div>
+                <div class="mb-2 md:mb-0">
+                    <label for="income" class="block text-gray-700 text-sm font-medium mb-2">Income</label>
+                    <input type="number" step="0.01" class="form-control appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="income" name="income" required>
+                </div>
+                <div class="mb-2 md:mb-0">
+                    <label for="inflation" class="block text-gray-700 text-sm font-medium mb-2">Inflation</label>
+                    <input type="number" step="0.01" class="form-control appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="inflation" name="inflation" required>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="mb-2 md:mb-0">
+                    <label for="life_expec" class="block text-gray-700 text-sm font-medium mb-2">Life Expectancy</label>
+                    <input type="number" step="0.01" class="form-control appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="life_expec" name="life_expec" required>
+                </div>
+                <div class="mb-2 md:mb-0">
+                    <label for="total_fer" class="block text-gray-700 text-sm font-medium mb-2">Total Fertility</label>
+                    <input type="number" step="0.01" class="form-control appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="total_fer" name="total_fer" required>
+                </div>
+                <div class="mb-2 md:mb-0">
+                    <label for="gdpp" class="block text-gray-700 text-sm font-medium mb-2">GDP per capita</label>
+                    <input type="number" step="0.01" class="form-control appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="gdpp" name="gdpp" required>
+                </div>
+            </div>
+            <button type="submit" class="btn-primary bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full shadow-md focus:outline-none focus:shadow-outline transition duration-300 ease-in-out w-full">
+                Predict Cluster
+            </button>
         </form>
-        <div id="result" class="mt-4"></div>
+        <div id="result" class="mt-6 p-4 bg-gray-50 rounded-md border border-gray-200 text-center"></div>
     </div>
 
     <script>
+        const countryNameInput = document.getElementById('country');
+        const countryImagePreview = document.getElementById('country-image-preview');
+
+        // Simple country-to-image mapping (for demonstration purposes)
+        const countryImages = {
+            "USA": "https://flagcdn.com/w320/us.png",
+            "Canada": "https://flagcdn.com/w320/ca.png",
+            "UK": "https://flagcdn.com/w320/gb.png",
+            "India": "https://flagcdn.com/w320/in.png",
+            "China": "https://flagcdn.com/w320/cn.png",
+            "Japan": "https://flagcdn.com/w320/jp.png",
+            "Brazil": "https://flagcdn.com/w320/br.png",
+            "Australia": "https://flagcdn.com/w320/au.png",
+            "Germany": "https://flagcdn.com/w320/de.png",
+            "France": "https://flagcdn.com/w320/fr.png",
+             "Nigeria": "https://flagcdn.com/w320/ng.png",
+            "Egypt": "https://flagcdn.com/w320/eg.png",
+            "South Africa": "https://flagcdn.com/w320/za.png",
+            "Mexico": "https://flagcdn.com/w320/mx.png",
+            "Russia": "https://flagcdn.com/w320/ru.png",
+            "Italy": "https://flagcdn.com/w320/it.png",
+            "Spain": "https://flagcdn.com/w320/es.png",
+            "Argentina": "https://flagcdn.com/w320/ar.png",
+            "Indonesia": "https://flagcdn.com/w320/id.png",
+            "Bangladesh": "https://flagcdn.com/w320/bd.png",
+            "Pakistan": "https://flagcdn.com/w320/pk.png",
+            "Vietnam": "https://flagcdn.com/w320/vn.png",
+            "Thailand": "https://flagcdn.com/w320/th.png",
+            "Malaysia": "https://flagcdn.com/w320/my.png",
+            "Singapore": "https://flagcdn.com/w320/sg.png",
+            "Philippines": "https://flagcdn.com/w320/ph.png",
+            "Netherlands": "https://flagcdn.com/w320/nl.png",
+            "Sweden": "https://flagcdn.com/w320/se.png",
+            "Switzerland": "https://flagcdn.com/w320/ch.png",
+            "Norway": "https://flagcdn.com/w320/no.png",
+            "Denmark": "https://flagcdn.com/w320/dk.png",
+            "Finland": "https://flagcdn.com/w320/fi.png",
+            "Poland": "https://flagcdn.com/w320/pl.png",
+            "Ukraine": "https://flagcdn.com/w320/ua.png",
+            "Greece": "https://flagcdn.com/w320/gr.png",
+            "Turkey": "https://flagcdn.com/w320/tr.png",
+            "Iran": "https://flagcdn.com/w320/ir.png",
+            "Saudi Arabia": "https://flagcdn.com/w320/sa.png",
+            "South Korea": "https://flagcdn.com/w320/kr.png",
+            "North Korea": "https://flagcdn.com/w320/kp.png",
+            "Israel": "https://flagcdn.com/w320/il.png",
+            "Ireland": "https://flagcdn.com/w320/ie.png",
+            "Portugal": "https://flagcdn.com/w320/pt.png",
+            "Austria": "https://flagcdn.com/w320/at.png",
+            "Belgium": "https://flagcdn.com/w320/be.png",
+            "Hungary": "https://flagcdn.com/w320/hu.png",
+            "Czech Republic": "https://flagcdn.com/w320/cz.png",
+            "Romania": "https://flagcdn.com/w320/ro.png",
+            "Bulgaria": "https://flagcdn.com/w320/bg.png",
+            "Croatia": "https://flagcdn.com/w320/hr.png",
+            "Serbia": "https://flagcdn.com/w320/rs.png",
+            "Slovakia": "https://flagcdn.com/w320/sk.png",
+            "Slovenia": "https://flagcdn.com/w320/si.png",
+            "Estonia": "https://flagcdn.com/w320/ee.png",
+            "Latvia": "https://flagcdn.com/w320/lv.png",
+            "Lithuania": "https://flagcdn.com/w320/lt.png",
+            "New Zealand": "https://flagcdn.com/w320/nz.png",
+            "Chile": "https://flagcdn.com/w320/cl.png",
+            "Colombia": "https://flagcdn.com/w320/co.png",
+            "Peru": "https://flagcdn.com/w320/pe.png",
+            "Venezuela": "https://flagcdn.com/w320/ve.png",
+            "Cuba": "https://flagcdn.com/w320/cu.png",
+            "Kenya": "https://flagcdn.com/w320/ke.png",
+            "Morocco": "https://flagcdn.com/w320/ma.png",
+            "Ghana": "https://flagcdn.com/w320/gh.png",
+            "Angola": "https://flagcdn.com/w320/ao.png",
+            "Algeria": "https://flagcdn.com/w320/dz.png",
+            "Tanzania": "https://flagcdn.com/w320/tz.png",
+            "Uganda": "https://flagcdn.com/w320/ug.png",
+            "Ethiopia": "https://flagcdn.com/w320/et.png",
+            "Sudan": "https://flagcdn.com/w320/sd.png",
+            "Afghanistan": "https://flagcdn.com/w320/af.png",
+            "Myanmar": "https://flagcdn.com/w320/mm.png",
+            "Sri Lanka": "https://flagcdn.com/w320/lk.png",
+            "Nepal": "https://flagcdn.com/w320/np.png",
+            "Cambodia": "https://flagcdn.com/w320/kh.png",
+            "Laos": "https://flagcdn.com/w320/la.png",
+            "Mongolia": "https://flagcdn.com/w320/mn.png",
+            "Kazakhstan": "https://flagcdn.com/w320/kz.png",
+            "Uzbekistan": "https://flagcdn.com/w320/uz.png",
+            "Kyrgyzstan": "https://flagcdn.com/w320/kg.png",
+            "Tajikistan": "https://flagcdn.com/w320/tj.png",
+            "Turkmenistan": "https://flagcdn.com/w320/tm.png",
+            "Azerbaijan": "https://flagcdn.com/w320/az.png",
+            "Georgia": "https://flagcdn.com/w320/ge.png",
+            "Armenia": "https://flagcdn.com/w320/am.png",
+            "Cyprus": "https://flagcdn.com/w320/cy.png",
+            "Lebanon": "https://flagcdn.com/w320/lb.png",
+            "Jordan": "https://flagcdn.com/w320/jo.png",
+            "Oman": "https://flagcdn.com/w320/om.png",
+            "Kuwait": "https://flagcdn.com/w320/kw.png",
+            "Qatar": "https://flagcdn.com/w320/qa.png",
+            "Bahrain": "https://flagcdn.com/w320/bh.png",
+            "UAE": "https://flagcdn.com/w320/ae.png",
+            "Yemen": "https://flagcdn.com/w320/ye.png",
+            "Syria": "https://flagcdn.com/w320/sy.png",
+            "Palestine": "https://flagcdn.com/w320/ps.png",
+            "Iraq": "https://flagcdn.com/w320/iq.png",
+            "Libya": "https://flagcdn.com/w320/ly.png",
+            "Tunisia": "https://flagcdn.com/w320/tn.png",
+            "Somalia": "https://flagcdn.com/w320/so.png",
+            "Cameroon": "https://flagcdn.com/w320/cm.png",
+            "Ivory Coast": "https://flagcdn.com/w320/ci.png",
+            "Senegal": "https://flagcdn.com/w320/sn.png",
+            "Zimbabwe": "https://flagcdn.com/w320/zw.png",
+            "Zambia": "https://flagcdn.com/w320/zm.png",
+            "Madagascar": "https://flagcdn.com/w320/mg.png",
+            "Mozambique": "https://flagcdn.com/w320/mz.png",
+            "Namibia": "https://flagcdn.com/w320/na.png",
+            "Botswana": "https://flagcdn.com/w320/bw.png",
+            "Uruguay": "https://flagcdn.com/w320/uy.png",
+            "Ecuador": "https://flagcdn.com/w320/ec.png",
+            "Bolivia": "https://flagcdn.com/w320/bo.png",
+            "Paraguay": "https://flagcdn.com/w320/py.png",
+            "Haiti": "https://flagcdn.com/w320/ht.png",
+            "Dominican Republic": "https://flagcdn.com/w320/do.png",
+            "Guatemala": "https://flagcdn.com/w320/gt.png",
+            "Honduras": "https://flagcdn.com/w320/hn.png",
+            "El Salvador": "https://flagcdn.com/w320/sv.png",
+            "Nicaragua": "https://flagcdn.com/w320/ni.png",
+            "Costa Rica": "https://flagcdn.com/w320/cr.png",
+            "Panama": "https://flagcdn.com/w320/pa.png",
+            "Jamaica": "https://flagcdn.com/w320/jm.png",
+            "Trinidad and Tobago": "https://flagcdn.com/w320/tt.png",
+            "Guyana": "https://flagcdn.com/w320/gy.png",
+            "Suriname": "https://flagcdn.com/w320/sr.png",
+            "Belize": "https://flagcdn.com/w320/bz.png",
+            "Barbados": "https://flagcdn.com/w320/bb.png",
+            "Fiji": "https://flagcdn.com/w320/fj.png",
+            "Papua New Guinea": "https://flagcdn.com/w320/pg.png",
+            "Solomon Islands": "https://flagcdn.com/w320/sb.png",
+            "Vanuatu": "https://flagcdn.com/w320/vu.png",
+            "Micronesia": "https://flagcdn.com/w320/fm.png",
+            "Kiribati": "https://flagcdn.com/w320/ki.png",
+            "Marshall Islands": "https://flagcdn.com/w320/mh.png",
+            "Nauru": "https://flagcdn.com/w320/nr.png",
+            "Palau": "https://flagcdn.com/w320/pw.png",
+            "Samoa": "https://flagcdn.com/w320/ws.png",
+            "Tonga": "https://flagcdn.com/w320/to.png",
+            "Tuvalu": "https://flagcdn.com/w320/tv.png",
+        };
+
+        countryNameInput.addEventListener('input', () => {
+            const countryName = countryNameInput.value.trim();
+            const imageURL = countryImages[countryName];
+            if (imageURL) {
+                countryImagePreview.src = imageURL;
+                countryImagePreview.classList.remove('hidden');
+            } else {
+                countryImagePreview.classList.add('hidden');
+                countryImagePreview.src = '#'; // Clear the source to prevent old image display
+            }
+        });
+
         document.getElementById('countryForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData.entries());
-            
+
             try {
-                const response = await fetch('/predict', {
+                const response = await fetch('/predict', { //  Ensure this matches your server endpoint
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(data)
                 });
-                
+
                 const result = await response.json();
                 const resultDiv = document.getElementById('result');
                 if (result.error) {
-                    resultDiv.innerHTML = `<div class="alert alert-danger">${result.error}</div>`;
+                    resultDiv.innerHTML = `<div class="alert alert-danger">
+                        <strong class="font-bold">Error!</strong>
+                        <span class="block sm:inline">${result.error}</span>
+                    </div>`;
                 } else {
-                    resultDiv.innerHTML = `
-                        <div class="alert alert-success">
-                            Country: ${result.country}<br>
-                            Cluster: ${result.cluster}
-                        </div>`;
+                    resultDiv.innerHTML = `<div class="alert alert-success">
+                            <strong class="font-bold">Prediction:</strong>
+                            <span class="block sm:inline">Country: ${result.country}, ${result.message}</span>
+                    </div>`;
                 }
             } catch (error) {
                 document.getElementById('result').innerHTML = `
                     <div class="alert alert-danger">
-                        Error: ${error.message}
+                        <strong class="font-bold">Error!</strong>
+                        <span class="block sm:inline">An error occurred: ${error.message}</span>
                     </div>`;
             }
         });

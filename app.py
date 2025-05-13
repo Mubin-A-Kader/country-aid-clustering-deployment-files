@@ -32,7 +32,7 @@ def home():
     return render_template('input.html')
 
 @app.route('/predict', methods=['POST', 'OPTIONS'])
-def predict_cluster():
+def predict():
     if request.method == 'OPTIONS':
         response = jsonify({'message': 'OK'})
         return response
@@ -66,7 +66,7 @@ def predict_cluster():
         })
 
         # Preprocess new data
-        new_country_processed = preprocessor.transform(new_country_data)
+        new_country_transformed = preprocessor.transform(new_country_data)
         
         numerical_features = ['child_mort', 'exports', 'health', 'imports', 'income', 
                             'inflation', 'life_expec', 'total_fer', 'gdpp']
@@ -75,19 +75,40 @@ def predict_cluster():
             preprocessor.named_transformers_['cat'].get_feature_names_out(categorical_features)
         )
         
-        new_country_processed = pd.DataFrame(new_country_processed, columns=feature_names)
-        new_country_processed = pd.concat([new_country_processed, clustered_df])
-
-        # Drop unnecessary columns
+        new_country_processed = pd.DataFrame(new_country_transformed, columns=feature_names)
+        
+        # Ensure both have the same columns
+        missing_cols = set(clustered_df.columns) - set(new_country_processed.columns)
+        for col in missing_cols:
+            new_country_processed[col] = 0.0
+            
+        # Reorder columns to match clustered_df
+        new_country_processed = new_country_processed[clustered_df.columns]
+        
+        # Concatenate new country with clustered dataset
+        combined_data = pd.concat([clustered_df, new_country_processed], ignore_index=True)
+        
+        # Drop unused columns
         columns_to_drop = ['country', 'High_Child_Mortality', 'Export_Import_Ratio']
-        new_country_processed = new_country_processed.drop(columns=columns_to_drop, errors='ignore')
+        combined_data_model_input = combined_data.drop(columns=columns_to_drop, errors='ignore')
+        
+        # Predict clusters
+        cluster_labels = hierarchical_model.fit_predict(combined_data_model_input)
+        
+        # Get cluster of new country (last row)
+        new_country_cluster = cluster_labels[-1]
 
-        # Make predictions
-        new_country_cluster = hierarchical_model.fit_predict(new_country_processed)
+        if int(new_country_cluster) == 1:
+            message = "🌍 Cluster 1: High Risk Zone – Urgent attention needed for development and stability."
+        elif int(new_country_cluster) == 2:
+            message = "✅ Cluster 2: Low Risk – Strong indicators of economic and social well-being!"
+        else:
+            message = "⚠️ Cluster 0: Moderate Risk – Developing steadily, but with key areas to improve."
 
         return jsonify({
             'country': data['country'],
-            'cluster': int(new_country_cluster[0])
+            # 'cluster': int(new_country_cluster),
+            'message': message
         })
 
     except Exception as e:
@@ -95,6 +116,7 @@ def predict_cluster():
             'error': 'Error processing request',
             'message': str(e)
         }), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=4000)
