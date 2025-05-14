@@ -20,42 +20,25 @@ def load_models():
 
 preprocessor, hierarchical_model, clustered_df = load_models()
 
-def lambda_handler(event, context):
+@app.route('/', methods=['POST'])
+def predict():
     try:
-        # Get data from event
-        if 'body' in event:
-            if isinstance(event['body'], str):
-                data = json.loads(event['body'])
-            else:
-                data = event['body']
-        else:
-            return {
-                'statusCode': 400,
-                'body': json.dumps({
-                    'error': 'No body found in request'
-                }),
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                }
-            }
+        # Get data from request
+        data = request.get_json()
+        if not data:
+            return jsonify({
+                'error': 'No data found in request'
+            }), 400
         
         # Validate input data
         required_fields = ['country', 'child_mort', 'exports', 'health', 'imports', 
                          'income', 'inflation', 'life_expec', 'total_fer', 'gdpp']
         
         if not all(field in data for field in required_fields):
-            return {
-                'statusCode': 400,
-                'body': json.dumps({
-                    'error': 'Missing required fields',
-                    'required_fields': required_fields
-                }),
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                }
-            }
+            return jsonify({
+                'error': 'Missing required fields',
+                'required_fields': required_fields
+            }), 400
 
         # Create DataFrame from input data
         new_country_data = pd.DataFrame({
@@ -111,31 +94,32 @@ def lambda_handler(event, context):
         else:
             message = "⚠️ Cluster 0: Moderate Risk – Developing steadily, but with key areas to improve."
 
-        return {
-            'statusCode': 200,
-            'body': json.dumps({
-                'country': data['country'],
-                'message': message
-            }),
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            }
-        }
+        return jsonify({
+            'country': data['country'],
+            'message': message
+        }), 200
 
     except Exception as e:
+        return jsonify({
+            'error': 'Error processing request',
+            'message': str(e)
+        }), 500
+
+def lambda_handler(event, context):
+    # Convert API Gateway event to Flask request
+    with app.test_client() as test_client:
+        response = test_client.post('/', 
+                                  json=json.loads(event['body']) if isinstance(event['body'], str) else event['body'],
+                                  headers={'Content-Type': 'application/json'})
+        
         return {
-            'statusCode': 500,
-            'body': json.dumps({
-                'error': 'Error processing request',
-                'message': str(e)
-            }),
+            'statusCode': response.status_code,
+            'body': response.get_data(as_text=True),
             'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
+                'Content-Type': 'application/json'
             }
         }
 
 # Keep this for local testing
 if __name__ == '__main__':
-    app.run(debug=False, port=4000)
+    app.run(debug=True, port=4000)
