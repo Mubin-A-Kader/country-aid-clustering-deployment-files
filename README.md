@@ -29,3 +29,10 @@ curl -X POST http://localhost:4000/predict \
     "gdpp": 45000,
     "country": "USA"
 }'
+
+
+#deploy lambda
+
+docker buildx build --platform linux/amd64 --provenance=false -t country-clustering . &&
+docker tag country-clustering:latest 975050071827.dkr.ecr.ap-south-1.amazonaws.com/country-clustering:latest &&
+docker push 975050071827.dkr.ecr.ap-south-1.amazonaws.com/country-clustering:latest

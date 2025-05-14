@@ -7,14 +7,7 @@ import numpy as np
 import json
 
 app = Flask(__name__)
-# Configure CORS with specific settings
-CORS(app, resources={
-    r"/*": {
-        "origins": "*",  # You can restrict this to specific domains in production
-        "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization"]
-    }
-})
+CORS(app)
 
 # Load the required models and data at startup
 def load_models():
@@ -42,7 +35,8 @@ def lambda_handler(event, context):
                     'error': 'No body found in request'
                 }),
                 'headers': {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
                 }
             }
         
@@ -58,7 +52,8 @@ def lambda_handler(event, context):
                     'required_fields': required_fields
                 }),
                 'headers': {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
                 }
             }
 
@@ -123,7 +118,8 @@ def lambda_handler(event, context):
                 'message': message
             }),
             'headers': {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
             }
         }
 
@@ -135,10 +131,11 @@ def lambda_handler(event, context):
                 'message': str(e)
             }),
             'headers': {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
             }
         }
 
 # Keep this for local testing
 if __name__ == '__main__':
-    app.run(debug=True, port=4000)
+    app.run(debug=False, port=4000)
