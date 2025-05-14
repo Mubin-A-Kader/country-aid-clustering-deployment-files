@@ -1,13 +1,8 @@
 
-from flask import Flask, request, jsonify
-from flask_cors import CORS
 import pandas as pd
 import pickle
 import numpy as np
 import json
-
-app = Flask(__name__)
-CORS(app)
 
 # Load the required models and data at startup
 def load_models():
@@ -20,25 +15,30 @@ def load_models():
 
 preprocessor, hierarchical_model, clustered_df = load_models()
 
-@app.route('/', methods=['POST'])
-def predict():
+def lambda_handler(event, context):
     try:
         # Get data from request
-        data = request.get_json()
+        data = json.loads(event['body']) if isinstance(event['body'], str) else event['body']
         if not data:
-            return jsonify({
-                'error': 'No data found in request'
-            }), 400
+            return {
+                'statusCode': 400,
+                'headers': {'Content-Type': 'application/json'},
+                'body': json.dumps({'error': 'No data found in request'})
+            }
         
         # Validate input data
         required_fields = ['country', 'child_mort', 'exports', 'health', 'imports', 
                          'income', 'inflation', 'life_expec', 'total_fer', 'gdpp']
         
         if not all(field in data for field in required_fields):
-            return jsonify({
-                'error': 'Missing required fields',
-                'required_fields': required_fields
-            }), 400
+            return {
+                'statusCode': 400,
+                'headers': {'Content-Type': 'application/json'},
+                'body': json.dumps({
+                    'error': 'Missing required fields',
+                    'required_fields': required_fields
+                })
+            }
 
         # Create DataFrame from input data
         new_country_data = pd.DataFrame({
@@ -81,7 +81,7 @@ def predict():
         columns_to_drop = ['country', 'High_Child_Mortality', 'Export_Import_Ratio']
         combined_data_model_input = combined_data.drop(columns=columns_to_drop, errors='ignore')
         
-        # Predict clusters
+        # Keep the original fit_predict logic
         cluster_labels = hierarchical_model.fit_predict(combined_data_model_input)
         
         # Get cluster of new country (last row)
@@ -94,32 +94,27 @@ def predict():
         else:
             message = "⚠️ Cluster 0: Moderate Risk – Developing steadily, but with key areas to improve."
 
-        return jsonify({
-            'country': data['country'],
-            'message': message
-        }), 200
-
-    except Exception as e:
-        return jsonify({
-            'error': 'Error processing request',
-            'message': str(e)
-        }), 500
-
-def lambda_handler(event, context):
-    # Convert API Gateway event to Flask request
-    with app.test_client() as test_client:
-        response = test_client.post('/', 
-                                  json=json.loads(event['body']) if isinstance(event['body'], str) else event['body'],
-                                  headers={'Content-Type': 'application/json'})
-        
         return {
-            'statusCode': response.status_code,
-            'body': response.get_data(as_text=True),
+            'statusCode': 200,
             'headers': {
-                'Content-Type': 'application/json'
-            }
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
+            'body': json.dumps({
+                'country': data['country'],
+                'message': message
+            })
         }
 
-# Keep this for local testing
-if __name__ == '__main__':
-    app.run(debug=True, port=4000)
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
+            'body': json.dumps({
+                'error': 'Error processing request',
+                'message': str(e)
+            })
+        }

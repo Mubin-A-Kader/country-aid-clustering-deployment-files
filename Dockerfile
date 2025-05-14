@@ -1,17 +1,14 @@
-# Use an official Python runtime as a parent image
-FROM python:3.10-slim
+# Use AWS Lambda Python runtime as base image
+FROM public.ecr.aws/lambda/python:3.10
 
-# Set the working directory in the container
-WORKDIR /app
+# Copy requirements file
+COPY requirements.txt ${LAMBDA_TASK_ROOT}
 
-# Copy the current directory contents into the container at /app
-COPY . .
+# Install the specified packages
+RUN pip install -r requirements.txt
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy function code and model files
+COPY . ${LAMBDA_TASK_ROOT}
 
-# Make port 5000 available to the world outside this container
-EXPOSE 4000
-
-# Run app.py when the container launches
-CMD ["python", "app.py"]
+# Set the CMD to your handler
+CMD [ "app.lambda_handler" ]
