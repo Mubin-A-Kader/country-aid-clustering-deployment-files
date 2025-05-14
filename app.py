@@ -1,20 +1,13 @@
 
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 import pandas as pd
 import pickle
 import numpy as np
+import json
 
 app = Flask(__name__)
-CORS(app, resources={
-    r"/*": {
-        "origins": "*",
-        "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization"],
-        "expose_headers": ["Content-Range", "X-Content-Range"],
-        "supports_credentials": True
-    }
-})
+CORS(app)
 
 # Load the required models and data at startup
 def load_models():
@@ -27,29 +20,42 @@ def load_models():
 
 preprocessor, hierarchical_model, clustered_df = load_models()
 
-@app.route('/')
-def home():
-    return render_template('input.html')
-
-@app.route('/predict', methods=['POST', 'OPTIONS'])
-def predict():
-    if request.method == 'OPTIONS':
-        response = jsonify({'message': 'OK'})
-        return response
-
+def lambda_handler(event, context):
     try:
-        # Get data from request
-        data = request.get_json()
+        # Get data from event
+        if 'body' in event:
+            if isinstance(event['body'], str):
+                data = json.loads(event['body'])
+            else:
+                data = event['body']
+        else:
+            return {
+                'statusCode': 400,
+                'body': json.dumps({
+                    'error': 'No body found in request'
+                }),
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                }
+            }
         
         # Validate input data
         required_fields = ['country', 'child_mort', 'exports', 'health', 'imports', 
                          'income', 'inflation', 'life_expec', 'total_fer', 'gdpp']
         
         if not all(field in data for field in required_fields):
-            return jsonify({
-                'error': 'Missing required fields',
-                'required_fields': required_fields
-            }), 400
+            return {
+                'statusCode': 400,
+                'body': json.dumps({
+                    'error': 'Missing required fields',
+                    'required_fields': required_fields
+                }),
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                }
+            }
 
         # Create DataFrame from input data
         new_country_data = pd.DataFrame({
@@ -105,18 +111,31 @@ def predict():
         else:
             message = "⚠️ Cluster 0: Moderate Risk – Developing steadily, but with key areas to improve."
 
-        return jsonify({
-            'country': data['country'],
-            # 'cluster': int(new_country_cluster),
-            'message': message
-        })
+        return {
+            'statusCode': 200,
+            'body': json.dumps({
+                'country': data['country'],
+                'message': message
+            }),
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            }
+        }
 
     except Exception as e:
-        return jsonify({
-            'error': 'Error processing request',
-            'message': str(e)
-        }), 500
+        return {
+            'statusCode': 500,
+            'body': json.dumps({
+                'error': 'Error processing request',
+                'message': str(e)
+            }),
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            }
+        }
 
-
+# Keep this for local testing
 if __name__ == '__main__':
     app.run(debug=True, port=4000)
