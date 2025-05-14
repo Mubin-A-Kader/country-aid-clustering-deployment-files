@@ -1,16 +1,17 @@
-FROM public.ecr.aws/lambda/python:3.9
+# Use an official Python runtime as a parent image
+FROM python:3.10-slim
 
-# Copy requirements.txt
-COPY requirements.txt ${LAMBDA_TASK_ROOT}
+# Set the working directory in the container
+WORKDIR /app
 
-# Install the specified packages
-RUN pip install -r requirements.txt
+# Copy the current directory contents into the container at /app
+COPY . .
 
-# Copy function code and model files
-COPY app.py ${LAMBDA_TASK_ROOT}
-COPY preprocessor.pkl ${LAMBDA_TASK_ROOT}
-COPY hierarchical_model.pkl ${LAMBDA_TASK_ROOT}
-COPY clustered_data.pkl ${LAMBDA_TASK_ROOT}
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Set the CMD to your handler
-CMD [ "app.lambda_handler" ]
+# Make port 5000 available to the world outside this container
+EXPOSE 4000
+
+# Run app.py when the container launches
+CMD ["python", "app.py"]
